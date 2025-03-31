@@ -1,14 +1,15 @@
 interface Command {
     void execute();
+    void undo();
 }
 
 class Light {
     public void turnOn() {
-        System.out.println("The light is on");
+        System.out.println("The light is ON");
     }
 
     public void turnOff() {
-        System.out.println("The light is off");
+        System.out.println("The light is OFF");
     }
 }
 
@@ -19,27 +20,52 @@ class TurnOnLightCommand implements Command {
         this.light = light;
     }
 
-    @Override
     public void execute() {
+        light.turnOn();
+    }
+
+    public void undo() {
+        light.turnOff();
+    }
+}
+
+class TurnOffLightCommand implements Command {
+    private Light light;
+
+    public TurnOffLightCommand(Light light) {
+        this.light = light;
+    }
+
+    public void execute() {
+        light.turnOff();
+    }
+
+    public void undo() {
         light.turnOn();
     }
 }
 
 class RemoteControl {
-    private Command command;
+    private Command lastCommand;
 
     public void setCommand(Command command) {
-        this.command = command;
+        this.lastCommand = command;
     }
 
-    public void pressButton() {
-        command.execute();
+    public void pressExecute() {
+        lastCommand.execute();
+    }
+
+    public void pressUndo() {
+        lastCommand.undo();
     }
 }
 
 // Usage
 Light livingRoomLight = new Light();
-Command lightsOn = new TurnOnLightCommand(livingRoomLight);
+Command lightOn = new TurnOnLightCommand(livingRoomLight);
 RemoteControl remote = new RemoteControl();
-remote.setCommand(lightsOn);
-remote.pressButton();
+
+remote.setCommand(lightOn);
+remote.pressExecute(); // Turns light ON
+remote.pressUndo();    // Turns light OFF
